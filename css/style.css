@@ -1,0 +1,26 @@
+/* Mobile First: estilos base valem para celular */
+body { background: #f5f7fa; }
+.hero { background: #0b5ed7; color: #fff; padding: 2.5rem 0; }
+.hero h1 { font-size: 1.6rem; }
+.rodape { text-align: center; padding: 1rem; margin-top: 2rem; background: #e9ecef; font-size: .875rem; }
+.layout { display: flex; flex-direction: column; gap: 1.5rem; }
+.lista { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+.item { background: #fff; border-left: 6px solid #6c757d; border-radius: .5rem; padding: .75rem; }
+.item.alto { border-left-color: #dc3545; }
+.item.medio { border-left-color: #ffc107; }
+.item.baixo { border-left-color: #198754; }
+.item h3 { font-size: 1.05rem; margin: 0; }
+.item .acoes { display: flex; gap: .5rem; margin-top: .5rem; }
+.vazio { color: #6c757d; }
+
+/* Tablet */
+@media (min-width: 768px) {
+  .hero h1 { font-size: 2.2rem; }
+  .lista { grid-template-columns: repeat(2, 1fr); }
+}
+/* Desktop */
+@media (min-width: 992px) {
+  .layout { flex-direction: row; align-items: flex-start; }
+  .layout > section:first-child { flex: 0 0 340px; }
+  .layout > section:last-child { flex: 1; }
+}
