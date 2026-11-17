@@ -15,6 +15,10 @@ const listaEl = document.getElementById("lista");
 const logEl = document.getElementById("log");
 const btnSalvar = document.getElementById("btn-salvar");
 const btnCancelar = document.getElementById("btn-cancelar");
+const filtroNivel = document.getElementById("filtro-nivel");
+const buscaEl = document.getElementById("busca");
+const resumoEl = document.getElementById("resumo");
+const btnExportar = document.getElementById("btn-exportar");
 
 // ---------- Registro de atividades ----------
 function registrar(mensagem) {
@@ -84,16 +88,57 @@ function remover(id) {
   if (salvar()) registrar("Ocorrência removida: " + (item ? item.tipo + " em " + item.bairro : "") + ".");
 }
 
+// BÔNUS: filtro por nível, busca por texto e resumo com contadores
+function filtrar() {
+  const nivel = filtroNivel.value;
+  const termo = buscaEl.value.trim().toLowerCase();
+  return ocorrencias.filter((o) => {
+    const textoOk = (o.tipo + " " + o.bairro + " " + o.descricao).toLowerCase().includes(termo);
+    return (nivel === "" || o.nivel === nivel) && textoOk;
+  });
+}
+
+function atualizarResumo(mostradas) {
+  const conta = (n) => ocorrencias.filter((o) => o.nivel === n).length;
+  resumoEl.textContent = "Mostrando " + mostradas + " de " + ocorrencias.length +
+    " — Alto: " + conta("Alto") + " | Médio: " + conta("Médio") + " | Baixo: " + conta("Baixo");
+}
+
 function listar() {
   listaEl.replaceChildren();
-  if (ocorrencias.length === 0) {
+  const visiveis = filtrar();
+  atualizarResumo(visiveis.length);
+  if (visiveis.length === 0) {
     const p = document.createElement("p");
     p.className = "vazio";
-    p.textContent = "Nenhuma ocorrência registrada.";
+    p.textContent = ocorrencias.length === 0 ? "Nenhuma ocorrência registrada." : "Nenhuma ocorrência encontrada com esse filtro.";
     listaEl.append(p);
     return;
   }
-  ocorrencias.forEach((o) => listaEl.append(criarCard(o)));
+  visiveis.forEach((o) => listaEl.append(criarCard(o)));
+}
+
+// BÔNUS: exportar os dados em arquivo JSON (Blob + URL.createObjectURL)
+function exportar() {
+  erroEl.textContent = "";
+  if (ocorrencias.length === 0) {
+    erroEl.textContent = "Não há ocorrências para exportar.";
+    registrar("Exportação cancelada: lista vazia.");
+    return;
+  }
+  try {
+    const blob = new Blob([JSON.stringify(ocorrencias, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ocorrencias.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    registrar("Exportação concluída: " + ocorrencias.length + " ocorrência(s).");
+  } catch (e) {
+    erroEl.textContent = "Não foi possível exportar. Tente novamente.";
+    registrar("Falha ao exportar dados.");
+  }
 }
 
 function criarCard(o) {
@@ -165,6 +210,9 @@ form.addEventListener("submit", (e) => {
 });
 
 btnCancelar.addEventListener("click", sairDaEdicao);
+filtroNivel.addEventListener("change", listar);
+buscaEl.addEventListener("input", listar);
+btnExportar.addEventListener("click", exportar);
 
 carregar();
 listar();
